@@ -1,59 +1,68 @@
-# FrontendCampeonato
+# Frontend — Campeonato (Angular)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.1.
+Uma SPA (Single Page Application) em **Angular 20 + Material** para organizar e simular um campeonato eliminatório (quartas, semis, 3º lugar e final) consumindo a API do backend (Laravel).
 
-## Development server
+> **Fluxo**: Login → Organize (criar/listar times, seleção de 8, seed) → Simular → Detalhe do torneio (chaveamento + standings) → Histórico.  
+> Layout responsivo, standalone components, Signals e interceptador de token.
 
-To start a local development server, run:
+---
 
+## 🔧 Stack & Decisões
+
+- **Angular 20** com *standalone components* e **Signals**.
+- **Angular Material** (Toolbar, Button, Card, Input, Checkbox, Icon, Progress Spinner, etc).
+- **RxJS** para chamadas HTTP.
+- **Roteamento** sem módulos: `/login`, `/organize`, `/tournaments/:id`, `/history`.
+- **Token Interceptor**: anexa `Authorization: Bearer <token>` a todas as requisições.
+- **Armazenamento do token**: `localStorage` (chave: `token`).
+
+---
+
+## 🚀 Começando
+
+### Pré-requisitos
+- **Node.js 18+ (recomendado 20+)**
+- **npm 9+** (ou pnpm/yarn)
+- Backend rodando (por padrão em `http://localhost` servindo `/api/...`).
+
+### Instalação
 ```bash
-ng serve
+# dentro da pasta do frontend
+npm ci         # ou: npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Ambiente
+Configure a URL da API em `src/environments/environment.ts`:
+```ts
+export const environment = {
+  production: false,
+  apiUrl: '' // string vazia = mesma origem (ex.: http://localhost:4200 → proxy/back mesmo host)
+};
+```
+> Os services usam caminhos relativos (`/api/...`). Se o backend estiver em outra origem/porta, use:
+> - URL completa no service, **ou**
+> - um **proxy** do dev-server, **ou**
+> - preencha `apiUrl` e concatene nos services.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### Rodando em desenvolvimento
 ```bash
-ng generate component component-name
+npm start    # alias para: ng serve
+# abre em http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+### Build de produção
 ```bash
-ng generate --help
+npm run build        # gera dist/
+# sirva como SPA (ver exemplos de deploy abaixo)
 ```
 
-## Building
+---
 
-To build the project run:
+## 🔐 Autenticação
 
-```bash
-ng build
-```
+- **Login**: `POST /api/login` (retorna `{ token, user }`).
+- Token salvo no `localStorage` e anexado pelo **TokenInterceptor**.
+- `/login` faz *auto-redirect* para `/organize` se já existir token.
+- Toolbar alterna **Login/Logout**; o logout limpa o token e redireciona.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+> Credenciais padrão (exemplo): `admin@example.com` / `secret`.
