@@ -1,39 +1,76 @@
-
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
-@use '@angular/material' as mat;
-
-html {
-  @include mat.theme((
-    color: (
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, "Noto Sans";
+  color:#0f172a;
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
-  margin: 0;
+input {
+  padding-left: 10px !important;
 }
-/* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Container padrão */
+.app-container{margin:50px auto 32px;padding:0 20px}
+
+/* Cards com “glass” sutil */
+.mat-mdc-card{
+  padding: 50px;
+  border-radius:16px !important;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(120%) blur(6px);
+  box-shadow:
+    0 1px 1px rgba(0,0,0,.03),
+    0 8px 24px rgba(15,23,42,.06) !important;
+}
+
+/* Títulos e utilitários */
+.h-title{font-size:24px;font-weight:800;letter-spacing:.2px;margin:0 0 8px}
+.spacer{flex:1}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;font-weight:700;font-size:12px;
+  background:#e3f2fd;border:1px solid #bbdefb;color:#0d47a1;
+}
+.badge.success{background:#e8f5e9;border-color:#c8e6c9;color:#1b5e20}
+.badge.warn   {background:#fff8e1;border-color:#ffe0b2;color:#e65100}
+.badge.gray   {background:#eceff1;border-color:#cfd8dc;color:#37474f}
+
+/* Grid responsivo */
+.two-col{display:grid;gap:20px;grid-template-columns:1fr 1fr}
+@media (max-width: 992px){.two-col{grid-template-columns:1fr}}
+
+/* Bracket com conectores */
+.bracket{display:grid;gap:14px;grid-template-columns:repeat(4,1fr)}
+.stage h5{margin:0 0 8px;font-size:13px;font-weight:800;opacity:.7;text-transform:uppercase;letter-spacing:.5px}
+
+.match{
+  position:relative;
+  padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;
+  font-size:14px;line-height:1.25;
+}
+.match.winner{background:#f1f8e9;border-color:#c8e6c9}
+.match.loser{opacity:.85}
+
+/* conectores entre colunas (desktop) */
+@media (min-width: 992px){
+  .stage-col{display:flex;flex-direction:column;gap:12px}
+  .stage-col .match::after{
+    content:"";position:absolute;right:-24px;top:50%;width:24px;height:1px;background:#e5e7eb;
+  }
+  /* semi/third/final “recebem” linha que chega */
+  .stage-col.receive .match::before{
+    content:"";position:absolute;left:-24px;top:-12px;width:24px;height:calc(100% + 24px);
+    border:1px solid #e5e7eb;border-right:none;border-radius:12px 0 0 12px;
+  }
+}
+
+/* Lista ordenada estilizada (standings) */
+.ol-clean{counter-reset:rank;list-style:none;margin:12px 0 0;padding:0}
+.ol-clean li{
+  counter-increment:rank;display:flex;gap:8px;align-items:center;
+  padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;margin:10px 0;
+}
+.ol-clean li::before{content:counter(rank) "º";font-weight:800;color:#0d47a1}
+.topbar{position:sticky;top:0;z-index:100}

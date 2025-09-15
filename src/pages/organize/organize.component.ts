@@ -10,76 +10,81 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   standalone: true,
   selector: 'app-organize',
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatInputModule, MatCheckboxModule, FormsModule],
+  imports: [
+    CommonModule, MatCardModule, MatButtonModule, MatInputModule, MatCheckboxModule,
+    MatFormFieldModule, MatIconModule, MatProgressSpinnerModule, MatSnackBarModule, FormsModule
+  ],
   template: `
-    <div class="grid">
+    <div class="two-col">
       <mat-card>
-        <h3>Times</h3>
-        <div class="row">
-          <input placeholder="Novo time" [(ngModel)]="newName" />
-          <button mat-stroked-button (click)="createTeam()">Adicionar</button>
-          <button mat-stroked-button (click)="quickCreate8()">Criar 8 de exemplo</button>
+        <div class="h-title">Times</div>
+
+        <div class="row" style="gap:10px;align-items:center">
+          <mat-form-field appearance="outline" style="flex:1">
+            <mat-label>Novo time</mat-label>
+            <input matInput placeholder="Nome do time" [(ngModel)]="newName" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" (click)="createTeam()">
+            <mat-icon>add</mat-icon> Adicionar
+          </button>
+          <button mat-stroked-button (click)="quickCreate8()">
+            <mat-icon>magic_button</mat-icon> Criar 8 de exemplo
+          </button>
         </div>
-        <div class="row">
-          <button mat-stroked-button (click)="selectFirst8()">Selecionar 8 primeiros</button>
-          <span style="margin-left:8px">Selecionados: {{ selectedCount }}/8</span>
+
+        <div class="row" style="gap:10px;align-items:center;margin-top:8px">
+          <button mat-stroked-button (click)="selectFirst8()">
+            <mat-icon>done_all</mat-icon> Selecionar 8 primeiros
+          </button>
+          <span class="badge" [class.success]="selectedCount===8">{{selectedCount}}/8</span>
         </div>
-        <div *ngFor="let t of teams()" class="row">
-          <mat-checkbox
-            [ngModel]="selected[t.id]"
-            (ngModelChange)="selected[t.id] = $event"
-          >
-            {{ t.name }} (#{{ t.registered_order }})
+
+        <div *ngFor="let t of teams()" class="row" style="margin:8px 0;align-items:center">
+          <mat-checkbox [ngModel]="selected[t.id] ?? false" (ngModelChange)="selected[t.id] = $event">
+            <b>{{ t.name }}</b> <span style="opacity:.6">(#{{ t.registered_order }})</span>
           </mat-checkbox>
-          <button mat-button color="warn" (click)="remove(t.id)">Remover</button>
+          <span class="spacer"></span>
+          <button mat-button color="warn" (click)="remove(t.id)"><mat-icon>delete</mat-icon> Remover</button>
         </div>
       </mat-card>
 
       <mat-card>
-        <h3>Organizar & Simular</h3>
-        <button
-          type="button"
-          mat-flat-button
-          color="primary"
-          (click)="start($event)"
-          [disabled]="selectedCount !== 8 || working()"
-        >
-          Seed (8)
-        </button>
+        <div class="h-title">Organizar & Simular</div>
 
-        <button
-          type="button"
-          mat-stroked-button
-          (click)="simulate($event)"
-          [disabled]="!currentId() || working()"
-        >
-          Simular
-        </button>
-        <p *ngIf="msg()" style="margin-top:8px">{{ msg() }}</p>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <button mat-flat-button color="primary" (click)="start()"
+                  [disabled]="selectedCount !== 8 || working()">
+            <mat-icon>play_circle</mat-icon> Seed (8)
+          </button>
+
+          <button mat-stroked-button (click)="simulate()" [disabled]="!currentId() || working()">
+            <mat-icon>sports</mat-icon> Simular
+          </button>
+
+          <span *ngIf="msg()" class="badge warn">{{ msg() }}</span>
+        </div>
       </mat-card>
     </div>
   `,
-  styles: [`
-    .grid{display:grid;gap:16px;grid-template-columns:1fr 1fr}
-    .row{display:flex;gap:8px;align-items:center;margin:8px 0}
-  `],
 })
 export class OrganizeComponent {
   teams = signal<Team[]>([]);
-  selected: Record<number, boolean> = {};
+  selected: Record<number, boolean | undefined> = {};
   newName = '';
   msg = signal('');
   working = signal(false);
   currentId = signal<number | undefined>(undefined);
 
-  // ✅ agora reconta corretamente (não usa computed, é um getter)
   get selectedCount(): number {
-    return Object.values(this.selected).filter(Boolean).length;
-    // se quiser debugar: console.log(this.selected);
+    return Object.values(this.selected).filter(v => v === true).length;
   }
 
   constructor(
@@ -87,7 +92,6 @@ export class OrganizeComponent {
     private tourSvc: TournamentsService,
     private router: Router
   ) {
-    // tenta recuperar o último torneio (SSR-safe)
     const last = typeof localStorage !== 'undefined' ? localStorage.getItem('lastTournamentId') : null;
     if (last) this.currentId.set(+last);
     this.refresh();
