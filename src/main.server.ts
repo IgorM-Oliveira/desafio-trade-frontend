@@ -1,8 +1,24 @@
-import { BootstrapContext, bootstrapApplication } from '@angular/platform-browser';
-import { App } from './app/app';
-import { config } from './app/app.config.server';
+import { bootstrapApplication, type BootstrapContext } from '@angular/platform-browser';
+import { provideServerRendering } from '@angular/platform-server';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-const bootstrap = (context: BootstrapContext) =>
-    bootstrapApplication(App, config, context);
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
+import { tokenInterceptor } from './shared/token.interceptor';
 
-export default bootstrap;
+export default function bootstrap(context: BootstrapContext) {
+  return bootstrapApplication(
+    AppComponent,
+    {
+      providers: [
+        provideServerRendering(),
+        provideRouter(routes),                       // ← sem hash
+        provideHttpClient(withInterceptors([tokenInterceptor]), withFetch()),
+        provideNoopAnimations(),
+      ],
+    },
+    context,
+  );
+}

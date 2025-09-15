@@ -1,6 +1,16 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
-import { App } from './app/app';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
+import { tokenInterceptor } from './shared/token.interceptor';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(routes),                          // ← sem hash
+    provideHttpClient(withInterceptors([tokenInterceptor]), withFetch()),
+    provideNoopAnimations(),
+  ],
+}).catch(err => console.error(err));
